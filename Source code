@@ -1,0 +1,48 @@
+%% Analysis of Tensile test data using MATLAB
+clc
+clear all
+close all
+%% Import data from text-file containing load (in KN) and Elongation(in m)
+A = importdata ("lab 1.txt")
+load = A.data(:,1); % unit: mm
+elongation = A.data(:,2);% unit: mm
+F = load*1000; % Convert load from KN to N
+d = elongation/1000; % Convert elongation from mm to m
+dia = 12/1000; % Diameter in m
+l0 = 50/1000; % Initial length in m
+Area = pi*dia*dia/4; % Cross-sectional area in square m
+engg_stress = F/Area; % Engineering Stress in Pa
+engg_strain = d/l0; % Engineering strain 
+engg_stress_mpa = engg_stress/ (10^-6); % Engineering stress in Mpa
+%% Plot load(in N) vs Elongation(in m)
+figure(1)
+plot(d,F,'--o','LineWidth' ,2,...
+     "MarkerEdgeColor",'r',...
+     'MarkerFaceColor','k',...
+     'MarkerSize',10)
+xlabel('Elongation(m)')
+ylabel('load(N)')
+title('Load vs Elongation')
+saveas(figure(1),'load_vs_Elongation.jpg')
+%% Plot Engineering Stress(in Mpa) vs Engineering strain
+figure(2)
+plot(engg_strain,engg_stress_mpa,'--rs','LineWidth',2,...
+    "MarkerEdgeColor",'k',...
+    'MarkerFaceColor','g',...
+    'MarkerSize',10)
+xlabel('Engineering strain')
+ylabel('Engineering Stress(inMpa)')
+title('Engineering stress vs Engineering strain')
+saveas(figure(2),'engg_stress -strain.jpg')
+%% pick proportion limit (in Mpa) from engg stress-straincurve and calculate young's modulus
+disp('Pick the proportional limit from the engineering stress-strain curve')
+disp('Left mouse buttons selects data-points on the curve')
+[strain_proplim stress_proplim] = ginput(1);
+n = length(engg_stress_mpa);
+for i = 1:n
+    if(engg_strain(i)<0.005)
+        diff(i) = abs(engg_stress_mpa(i)-stress_proplim)
+    end
+end
+[Prop_limit index_proplim] = min(diff)
+Elastic_modulus = (engg_strain(1:index_proplim)\engg_stress_mpa(1:index_proplim))/1000 % Units Gpa
